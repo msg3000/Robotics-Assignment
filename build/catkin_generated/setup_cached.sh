@@ -9,6 +9,7 @@
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/msg/ros_home/robot_assignment_ws/devel:$CMAKE_PREFIX_PATH"
 export LD_LIBRARY_PATH="/home/msg/ros_home/robot_assignment_ws/devel/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/home/msg/ros_home/robot_assignment_ws/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD="/home/msg/ros_home/robot_assignment_ws/build"
 export ROSLISP_PACKAGE_DIRECTORIES="/home/msg/ros_home/robot_assignment_ws/devel/share/common-lisp"
 export ROS_PACKAGE_PATH="/home/pravesh/ros_home/robot_assignment_ws/src:/home/msg/ros_home/robot_assignment_ws/src:$ROS_PACKAGE_PATH"
