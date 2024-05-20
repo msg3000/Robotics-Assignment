@@ -1,7 +1,7 @@
 slam_gmapping:
   maxUrange: 6.0
   maxRange: 10.0
-  sigma: 0.05
+  sigma: 1
   kernelSize: 1
   linearUpdate: 0.1
   angularUpdate: 0.2
