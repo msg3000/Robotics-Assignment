@@ -25,20 +25,21 @@ def navigateTo(target=None):
     start = None # Starting position
     goal = None # Ending position
 
-    waypoints = [np.array([5,5])]
+    waypoints = [np.array([10,10])]
     waypoint_count = 0
     
 
-    pid_linear = PIDController(1,1,1)
-    pid_angular = PIDController(1,1,1)
+    pid_linear = PIDController(0.1, 0,0)
+    pid_angular = PIDController(0.1, 0,0)
 
 
     # Follow PID Iteratively
     while (not rospy.is_shutdown() and waypoint_count < len(waypoints)):
 
         # Get the current position and angular velocity in world
-        position, yaw = navigator.get_model_state()
+        position, yaw = navigator.getCurrentState()
         position = np.array([position.x, position.y])
+        print(position)
 
         # Compute target orientation based on current waypoint
         direction = waypoints[waypoint_count] - position
@@ -51,6 +52,8 @@ def navigateTo(target=None):
         # Compute PID updates for linear and angular velocities
         update_linear = pid_linear.getUpdate(position)
         update_angular = pid_angular.getUpdate(yaw)
+        print(update_linear)
+        print(update_angular)
 
         # Publish velocities
         navigator.publish_velocity(update_linear, update_angular)
@@ -70,11 +73,10 @@ def navigateTo(target=None):
 if __name__ == '__main__':
     try:
         init_node() # Create node
-        try:
-            target = parse_coordinates(input())
-            navigateTo()
-        except:
-            print("Please specify the target location in the form x,y")
+        # target = parse_coordinates(input())
+        navigateTo()
+        # except:
+        #     print("Please specify the target location in the form x,y")
         
     except rospy.ROSInterruptException:
         pass
