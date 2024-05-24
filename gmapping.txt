@@ -1,0 +1,7 @@
+./startWorld
+
+rosrun gmapping slam_gmapping
+
+roslaunch turtlebot_rviz_launchers view_navigation.launch
+
+roslaunch kobuki_keyop keyop.launch

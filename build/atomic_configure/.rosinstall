@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/msg/ros_home/robot_assignment_ws/devel/setup.sh
+    local-name: /home/shnifel/ros_home/robot_assignment_ws/devel/setup.sh

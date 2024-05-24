@@ -3,6 +3,7 @@ import rospy
 from std_msgs.msg import Empty
 from geometry_msgs.msg import Twist
 
+
 def init_node():
     # Create drone node
     rospy.init_node('drone', anonymous=True)
