@@ -15,7 +15,7 @@ class PIDController:
         self.ki = ki
         self.kd = kd
 
-        self.prev_time = 0
+        self.prev_time = time.time()
         self.prev_err = 0
         self.err_i = 0
 

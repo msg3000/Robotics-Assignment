@@ -25,12 +25,12 @@ def navigateTo(target=None):
     start = None # Starting position
     goal = None # Ending position
 
-    waypoints = [np.array([10,10])]
+    waypoints = [np.array([1,1]), np.array([2,1])]
     waypoint_count = 0
     
 
-    pid_linear = PIDController(0.1, 0,0)
-    pid_angular = PIDController(0.1, 0,0)
+    pid_linear = PIDController(0.5, 0.1,0)
+    pid_angular = PIDController(1, 0.1,0.5)
 
 
     # Follow PID Iteratively
@@ -43,7 +43,22 @@ def navigateTo(target=None):
 
         # Compute target orientation based on current waypoint
         direction = waypoints[waypoint_count] - position
+        print(direction)
         target_angular = np.arctan2(direction[1], direction[0])
+        print(target_angular)
+
+        if yaw < 0:
+            yaw += 2*np.pi
+        
+        if target_angular < 0:
+            target_angular += 2*np.pi
+        
+        if yaw - target_angular > np.pi:
+            target_angular += 2*np.pi
+        
+        if target_angular - yaw > np.pi:
+            yaw += 2*np.pi
+        
 
         # Set the goals
         pid_linear.goal = waypoints[waypoint_count]
@@ -56,13 +71,17 @@ def navigateTo(target=None):
         print(update_angular)
 
         # Publish velocities
+        if abs(update_angular) >= 0.01:
+            update_linear = [0,0]
+        update_linear = [np.linalg.norm(update_linear), 0]
         navigator.publish_velocity(update_linear, update_angular)
 
         # Reached current waypoint, advance next
         if np.linalg.norm(position - waypoints[waypoint_count]) < 0.05:
+            rospy.loginfo("Reached this wayppoint")
             waypoint_count += 1
             if waypoint_count < len(waypoints):
-                update_linear.goal = waypoints[waypoint_count]
+                pid_linear.goal = waypoints[waypoint_count]
     
     rospy.loginfo("Successfully arrived at location: %s ! ", position)
 
