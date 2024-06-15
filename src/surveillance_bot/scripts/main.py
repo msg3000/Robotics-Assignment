@@ -6,6 +6,7 @@ from pid import PIDController
 from navigator import Navigator
 import numpy as np
 from Mapping import WorldMapping
+import cv2
 
 def init_node():
     # Create drone node
@@ -21,6 +22,12 @@ def navigateTo(target=None):
 
     WorldMap=WorldMapping(0.05,[-13,-3,0])
     GoalpixelCoords=WorldMap.world_to_pixel(target[0],target[1])
+    image = np.array(WorldMap.image) #Added this
+
+    # Add padding to obstacles
+    padding_size = 5  # Adjust this value as needed
+    kernel = np.ones((padding_size, padding_size), np.uint8)
+    padded_binary_image = cv2.dilate(image, kernel, iterations=1)
     
     # -- Load in Map
     # Map start, target to image coords
