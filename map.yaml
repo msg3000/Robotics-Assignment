@@ -1,6 +1,6 @@
 image: map_2.jpg
 resolution: 0.05  # Map resolution [m/cell]
-origin: [0.0, 0.0, 0.0]  # Origin [x, y, theta]
+origin: [-12.8230923094, -2.92703642459, 0.0]  # Origin [x, y, theta]
 occupied_thresh: 0.65  # Threshold for cells considered occupied
 free_thresh: 0.196  # Threshold for cells considered free
 negate: 0  # Negate the meaning of pixels (0=occupied, 1=free)

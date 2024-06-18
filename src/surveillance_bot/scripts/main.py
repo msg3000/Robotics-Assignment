@@ -5,28 +5,47 @@ from geometry_msgs.msg import Twist
 from pid import PIDController
 from navigator import Navigator
 import numpy as np
-
+from Mapping import WorldMapping
+import cv2
 
 def init_node():
     # Create drone node
     rospy.init_node('surveillance_bot', anonymous=True)
+    
 
 def parse_coordinates(coords):
-    return list(map(float, coords.split(',')))
+    print(coords)
+    return list(map(float, coords))
 
 def navigateTo(target=None):
 
+
+    WorldMap=WorldMapping(0.05,[-13,-3,0])
+    GoalpixelCoords=WorldMap.world_to_pixel(target[0],target[1])
+    image = np.array(WorldMap.image) #Added this
+
+    # Add padding to obstacles
+    padding_size = 5  # Adjust this value as needed
+    kernel = np.ones((padding_size, padding_size), np.uint8)
+    padded_binary_image = cv2.dilate(image, kernel, iterations=1)
+    
     # -- Load in Map
     # Map start, target to image coords
     # Build PRM on that map
     # Generate path from PRM and convert to world points
 
     navigator = Navigator()
-
+    currentPos, _ =navigator.getCurrentState()
+    print("CURRENT POS:", currentPos)
+    CurrentpixelCoords=WorldMap.world_to_pixel(currentPos.x,currentPos.y)
+    print("HEIGHT",WorldMap.height)
+    print("WIDTH", WorldMap.width)
+    print("CURRENT PIXEL COORDS: ",CurrentpixelCoords)
+    print("GOAL PIXEL COORDS: ",GoalpixelCoords)
     start = None # Starting position
     goal = None # Ending position
 
-    waypoints = [np.array([1,1]), np.array([2,1])]
+    waypoints = [np.array([-1,0]), np.array([2,1])]
     waypoint_count = 0
     
 
@@ -40,14 +59,12 @@ def navigateTo(target=None):
         # Get the current position and angular velocity in world
         position, yaw = navigator.getCurrentState()
         position = np.array([position.x, position.y])
-        print(position)
-
+       
         # Compute target orientation based on current waypoint
         direction = waypoints[waypoint_count] - position
-        print(direction)
+       
         target_angular = np.arctan2(direction[1], direction[0])
-        print(target_angular)
-
+        
         if yaw < 0:
             yaw += 2*np.pi
         
@@ -68,9 +85,7 @@ def navigateTo(target=None):
         # Compute PID updates for linear and angular velocities
         update_linear = pid_linear.getUpdate(position)
         update_angular = pid_angular.getUpdate(yaw)
-        print(update_linear)
-        print(update_angular)
-
+        
         # Publish velocities
         if abs(update_angular) >= 0.01:
             update_linear = [0,0]
@@ -93,8 +108,8 @@ def navigateTo(target=None):
 if __name__ == '__main__':
     try:
         init_node() # Create node
-        # target = parse_coordinates(input())
-        navigateTo()
+        target = parse_coordinates(input())
+        navigateTo(target)
         # except:
         #     print("Please specify the target location in the form x,y")
         

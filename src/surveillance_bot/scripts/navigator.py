@@ -22,7 +22,7 @@ class Navigator:
 
     def getCurrentState(self):
         state = self.get_model_state('mobile_base', "")
-        print(state)
+        
         position, orientation = state.pose.position, state.pose.orientation
         _, _, yaw = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         return (position, yaw)

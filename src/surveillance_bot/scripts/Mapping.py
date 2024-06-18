@@ -6,7 +6,7 @@ class WorldMapping:
 
     def __init__(self, resolution, origin):
         self.origin= origin
-        self.image=Image.open('/home/shnifel/ros_home/robot_assignment_ws/map.yaml')
+        self.image=Image.open('/home/shnifel/ros_home/robot_assignment_ws/map_2.jpg')
         self.height= self.image.size[1]
         self.width= self.image.size[0]
         self.resolution = resolution
