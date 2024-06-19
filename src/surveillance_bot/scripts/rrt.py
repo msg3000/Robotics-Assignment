@@ -86,19 +86,27 @@ class Node:
         self.x = x
         self.y = y
         self.parent = None
+        self.cost = 0
 
 class RRT:
-    def __init__(self, start, goal, grid_map, world_map, step_size=1):
+    def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2):
         self.start = Node(*world_map.world_to_pixel(*start))
         self.goal = Node(*world_map.world_to_pixel(*goal))
         self.grid_map = grid_map
         self.world_map = world_map
         self.step_size = step_size
+        self.neighbourhood_size = neighbourhood_size
+        self.goal_sample_probs = 0.1
         self.tree = [self.start]
 
     def get_random_point(self):
-        x = random.randint(0, self.grid_map.width - 1)
-        y = random.randint(0, self.grid_map.height - 1)
+        x,y = None, None
+        if random.uniform(0,1) < self.goal_sample_probs:
+            x = self.goal.x
+            y = self.goal.y
+        else:
+            x = random.randint(0, self.grid_map.width - 1)
+            y = random.randint(0, self.grid_map.height - 1)
         return x, y
 
     def get_nearest_node(self, point):
@@ -110,6 +118,13 @@ class RRT:
                 min_dist = dist
                 nearest_node = node
         return nearest_node
+    
+    def get_neighbourhood(self, point):
+        neighbourhood = []
+        for node in self.tree:
+            if self.euclidean_distance((node.x, node.y), point) <= self.neighbourhood_size:
+                neighbourhood.append(node)
+        return neighbourhood
 
     def euclidean_distance(self, point1, point2):
         return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
