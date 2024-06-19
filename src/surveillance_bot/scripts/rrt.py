@@ -4,19 +4,62 @@ from Mapping import WorldMapping
 import random
 import math
 from PIL import Image, ImageOps
+import matplotlib.pyplot as plt
 
 WorldMap=WorldMapping(0.05,[-13,-3,0])
 image = WorldMap.image
 
+def binary_dilation_image(image, structuring_element):
+
+  image_h, image_w = image.shape
+  struct_h, struct_w = structuring_element.shape
+  # Calculate the padding needed for the structuring element
+  pad_h = struct_h // 2
+  pad_w = struct_w // 2
+  # Pad the original image with zeros around the border
+  padded_image = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)), mode='constant', constant_values=0)
+  # Initialize the output dilated image
+  dilated_image = np.zeros_like(image)
+  # Perform the dilation operation
+  for i in range(image_h):
+      for j in range(image_w):# Extract the region of interest from the padded image
+          region = padded_image[i:i + struct_h, j:j + struct_w]# Apply the structuring element
+          if np.any(np.logical_and(region,structuring_element)):
+              dilated_image[i, j] = 1
+  return dilated_image
+
+
+def bresenham_line(x0, y0, x1, y1):
+    
+    points = []
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx - dy
+
+    while True:
+        points.append((x0, y0))
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = err * 2
+        if e2 > -dy:
+            err -= dy
+            x0 += sx
+        if e2 < dx:
+            err += dx
+            y0 += sy
+
+    return points
 
 def padding(image):
     # Convert the image to binary (0: obstacles, 255: free space)
-    binary_image = image.point(lambda p: p > 128 and 255)
-
+    image = ImageOps.grayscale(image)
+    binary_image = image.point(lambda p: p > 128 and 1)
+    
     # Add padding to obstacles
-    padding_size = 5  # Adjust this value as needed
-    padded_binary_image = ImageOps.expand(binary_image, border=padding_size, fill=0)
-
+    padding_size = 16  # Adjust this value as needed
+    padded_binary_image = binary_dilation_image(1-np.array(binary_image), np.ones((padding_size,padding_size)))
     # Convert padded image to numpy array
     padded_binary_image = np.array(padded_binary_image)
 
@@ -26,10 +69,10 @@ class GridMapFromImage:
     def __init__(self, binary_image):
         self.binary_image = binary_image
         self.height, self.width = binary_image.shape
-
+        
     def is_free_space(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:
-            return self.binary_image[y, x] == 255
+            return self.binary_image[y, x] == 0
         return False
 
 padded_binary_image = padding(image)
@@ -71,9 +114,11 @@ class RRT:
     def euclidean_distance(self, point1, point2):
         return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
-    def is_collision_free(self, x, y):
-        return self.grid_map.is_free_space(x, y)
-
+    def is_collision_free(self, x, y, x1, y1):
+        points=bresenham_line(x,y,x1,y1)
+       
+        return np.all([self.grid_map.is_free_space(dx, dy) for dx,dy in points])
+        
     def step(self):
         random_point = self.get_random_point()
         nearest_node = self.get_nearest_node(random_point)
@@ -81,7 +126,7 @@ class RRT:
         new_x = int(nearest_node.x + self.step_size * math.cos(theta))
         new_y = int(nearest_node.y + self.step_size * math.sin(theta))
         
-        if self.is_collision_free(new_x, new_y):
+        if self.is_collision_free(nearest_node.x, nearest_node.y, new_x, new_y):
             new_node = Node(new_x, new_y)
             new_node.parent = nearest_node
             self.tree.append(new_node)
@@ -106,13 +151,3 @@ class RRT:
             node = node.parent
         return path[::-1]  # Reverse the path
 
-# Define start and goal coordinates in world coordinates
-start_world = (0, 0)  # Example start coordinate in world coordinates
-goal_world = (4, 4)  # Example goal coordinate in world coordinates
-
-# Initialize RRT with world coordinates
-rrt = RRT(start_world, goal_world, grid_map_obj, WorldMap, step_size=10)
-
-# Build RRT and get the path
-path = rrt.build()
-print("Path in world coordinates:", path)
