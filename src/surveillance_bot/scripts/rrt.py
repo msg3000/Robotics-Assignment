@@ -6,8 +6,6 @@ import math
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
-WorldMap=WorldMapping(0.05,[-13,-3,0])
-image = WorldMap.image
 
 def binary_dilation_image(image, structuring_element):
 
@@ -58,7 +56,7 @@ def padding(image):
     binary_image = image.point(lambda p: p > 128 and 1)
     
     # Add padding to obstacles
-    padding_size = 16  # Adjust this value as needed
+    padding_size = 16    # Adjust this value as needed
     padded_binary_image = binary_dilation_image(1-np.array(binary_image), np.ones((padding_size,padding_size)))
     # Convert padded image to numpy array
     padded_binary_image = np.array(padded_binary_image)
@@ -74,10 +72,6 @@ class GridMapFromImage:
         if 0 <= x < self.width and 0 <= y < self.height:
             return self.binary_image[y, x] == 0
         return False
-
-padded_binary_image = padding(image)
-# Initialize the grid map from the padded binary image
-grid_map_obj = GridMapFromImage(padded_binary_image)
 
 
 
@@ -96,7 +90,7 @@ class RRT:
         self.world_map = world_map
         self.step_size = step_size
         self.neighbourhood_size = neighbourhood_size
-        self.goal_sample_probs = 0.1
+        self.goal_sample_probs = 0
         self.tree = [self.start]
 
     def get_random_point(self):
@@ -105,8 +99,8 @@ class RRT:
             x = self.goal.x
             y = self.goal.y
         else:
-            x = random.randint(0, self.grid_map.width - 1)
-            y = random.randint(0, self.grid_map.height - 1)
+            x = random.randint(105, 465)
+            y = random.randint(60, 335)
         return x, y
 
     def get_nearest_node(self, point):
@@ -139,6 +133,7 @@ class RRT:
 
         
     def step(self):
+        
         random_point = self.get_random_point()
         nearest_node = self.get_nearest_node(random_point)
         theta = math.atan2(random_point[1] - nearest_node.y, random_point[0] - nearest_node.x)
@@ -147,9 +142,10 @@ class RRT:
         
         if self.is_collision_free(nearest_node.x, nearest_node.y, new_x, new_y):
             new_node = Node(new_x, new_y)
-            self.tree.append(new_node)
+            
             neighbourhood = self.get_neighbourhood((new_x, new_y))
             parent_node = self.get_shortest_path_node(neighbourhood, (new_x, new_y))
+            self.tree.append(new_node)
             new_node.parent = parent_node
             new_node.cost = parent_node.cost + self.euclidean_distance((parent_node.x, parent_node.y), (new_x, new_y))
 
@@ -158,7 +154,6 @@ class RRT:
                 if node_neighbour.cost > tentative_cost :
                     node_neighbour.parent = new_node
                     node_neighbour.cost = tentative_cost
-
             if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
                 self.goal.parent = new_node
                 self.tree.append(self.goal)

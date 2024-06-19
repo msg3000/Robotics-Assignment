@@ -22,7 +22,7 @@ def parse_coordinates(coords):
 def navigateTo(target=None):
 
     
-    WorldMap=WorldMapping(0.05,[-13,-3,0])
+    WorldMap=WorldMapping(0.05,[-17,-14.4,0])
    # GoalpixelCoords=WorldMap.world_to_pixel(target[0],target[1])
    
     image = WorldMap.image #Added this
@@ -48,7 +48,7 @@ def navigateTo(target=None):
     start = None # Starting position
     goal = None # Ending position
 
-    rrt=RRT((0,0), target, grid_map_obj, WorldMap, 10)
+    rrt=RRT((currentPos.x,currentPos.y), target, grid_map_obj, WorldMap, 15 , 25)
     
     waypoints = rrt.build()
     waypoints_pixel = [WorldMap.world_to_pixel(x[0], x[1]) for x in waypoints]
@@ -78,8 +78,8 @@ def navigateTo(target=None):
     waypoint_count = 0
     
 
-    pid_linear = PIDController(2, 0,0)
-    pid_angular = PIDController(1, 0.1,0.5)
+    pid_linear = PIDController(1, 0.01,0)
+    pid_angular = PIDController(2, 0,0)
 
 
     # Follow PID Iteratively
@@ -116,9 +116,11 @@ def navigateTo(target=None):
         update_angular = pid_angular.getUpdate(yaw)
         
         # Publish velocities
-        if abs(update_angular) >= 0.1:
+        if abs(update_angular) >= 0.4:
             update_linear = [0,0]
         update_linear = [np.linalg.norm(update_linear), 0]
+        if (update_linear[0]!=0):
+            update_angular=0    
         navigator.publish_velocity(update_linear, update_angular)
 
         # Reached current waypoint, advance next
@@ -140,6 +142,7 @@ if __name__ == '__main__':
         target = parse_coordinates(input())
         
         navigateTo(target)
+
         # except:
         #     print("Please specify the target location in the form x,y")
         

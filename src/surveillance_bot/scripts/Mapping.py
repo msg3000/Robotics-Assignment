@@ -9,8 +9,8 @@ class WorldMapping:
         self.image=Image.open('/home/shnifel/ros_home/robot_assignment_ws/map_2_final.jpg')
         self.height= self.image.size[1]
         self.width= self.image.size[0]
-        self.resolutiony = 16.0/self.height
-        self.resolutionx = 20.0/self.width 
+        self.resolutiony = 28.8/self.height
+        self.resolutionx = 28.8/self.width 
 
     def pixel_to_world(self,px, py):
         wx = self.origin[0] + px * self.resolutionx
