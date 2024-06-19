@@ -122,7 +122,7 @@ class RRT:
     def get_neighbourhood(self, point):
         neighbourhood = []
         for node in self.tree:
-            if self.euclidean_distance((node.x, node.y), point) <= self.neighbourhood_size:
+            if self.euclidean_distance((node.x, node.y), point) <= self.neighbourhood_size and self.is_collision_free(node.x, node.y, point[0], point[1]):
                 neighbourhood.append(node)
         return neighbourhood
 
@@ -133,6 +133,10 @@ class RRT:
         points=bresenham_line(x,y,x1,y1)
        
         return np.all([self.grid_map.is_free_space(dx, dy) for dx,dy in points])
+    
+    def get_shortest_path_node(self, neighbourhood, point):
+        return neighbourhood[np.argmin([node.cost + self.euclidean_distance((node.x, node.y), point) for node in neighbourhood])]
+
         
     def step(self):
         random_point = self.get_random_point()
@@ -143,8 +147,18 @@ class RRT:
         
         if self.is_collision_free(nearest_node.x, nearest_node.y, new_x, new_y):
             new_node = Node(new_x, new_y)
-            new_node.parent = nearest_node
             self.tree.append(new_node)
+            neighbourhood = self.get_neighbourhood((new_x, new_y))
+            parent_node = self.get_shortest_path_node(neighbourhood, (new_x, new_y))
+            new_node.parent = parent_node
+            new_node.cost = parent_node.cost + self.euclidean_distance((parent_node.x, parent_node.y), (new_x, new_y))
+
+            for node_neighbour in neighbourhood:
+                tentative_cost = new_node.cost + self.euclidean_distance((node_neighbour.x, node_neighbour.y), (new_x,new_y))
+                if node_neighbour.cost > tentative_cost :
+                    node_neighbour.parent = new_node
+                    node_neighbour.cost = tentative_cost
+
             if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
                 self.goal.parent = new_node
                 self.tree.append(self.goal)
