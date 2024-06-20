@@ -91,12 +91,13 @@ class Node:
         self.y = y
         self.parent = None
         self.cost = 0
+        self.children = []
 
 class RRT:
     """
     Implements RRT* algorithm
     """
-    def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2):
+    def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2, verbose = True):
         self.start = Node(*world_map.world_to_pixel(*start))
         self.goal = Node(*world_map.world_to_pixel(*goal))
         self.grid_map = grid_map
@@ -105,6 +106,7 @@ class RRT:
         self.neighbourhood_size = neighbourhood_size
         self.goal_sample_probs = 0.1 # Sample goal with some probability
         self.tree = [self.start]
+        self.verbose = verbose
 
     def get_random_point(self):
         """
@@ -182,20 +184,33 @@ class RRT:
             self.tree.append(new_node)
             new_node.parent = parent_node
             new_node.cost = parent_node.cost + self.euclidean_distance((parent_node.x, parent_node.y), (new_x, new_y))
+            parent_node.children.append(new_node)
+            
 
             # Rewire tree for optimality
             for node_neighbour in neighbourhood:
                 tentative_cost = new_node.cost + self.euclidean_distance((node_neighbour.x, node_neighbour.y), (new_x,new_y))
                 if node_neighbour.cost > tentative_cost :
+                    node_neighbour.parent.children.remove(node_neighbour)
                     node_neighbour.parent = new_node
+                    new_node.children.append(node_neighbour)
                     node_neighbour.cost = tentative_cost
 
             # Goal test
             if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
                 self.goal.parent = new_node
+                new_node.children.append(self.goal)
                 self.tree.append(self.goal)
                 return True
         return False
+    
+    def visualize(self, root):
+        plt.plot(root.x, root.y, 'go', markersize = 3)
+        for child in root.children:
+            plt.plot([root.x, child.x], [root.y, child.y], color='green', linestyle = '--')
+            self.visualize(child)
+        
+
 
     def build(self, max_steps=1000):
         """
@@ -210,10 +225,17 @@ class RRT:
         """
         Reconfigure path from goal node
         """
+        if self.verbose:
+            plt.plot(self.start.x, self.start.y, 'bo', markersize = 8, label = "Start")
+            plt.text(self.start.x - 2, self.start.y - 2,'START')
+            plt.plot(self.goal.x, self.goal.y, 'bo', markersize = 8, label = "Start")
+            plt.text(self.goal.x + 2, self.goal.y + 2,'GOAL')
         path = []
         node = self.goal
-        while node is not None:
+        while node.parent is not None:
             world_x, world_y = self.world_map.pixel_to_world(node.x, node.y)
+            if self.verbose:
+                plt.plot([node.parent.x, node.x], [node.parent.y, node.y], color='red', linewidth =3)
             path.append((world_x, world_y))
             node = node.parent
         return path[::-1]  # Reverse the path

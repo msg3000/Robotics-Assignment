@@ -50,7 +50,7 @@ def navigateTo(target=None):
 
     rospy.loginfo("Computing path from ({}, {}) to ({}, {})...".format(round(start.x,2), round(start.y,2), target[0], target[1]))
     # Instantiate RRT with current start, goal, grid map and step size parameters
-    rrt=RRT((start.x,start.y), target, grid_map_obj, WorldMap, 15 , 25)
+    rrt=RRT((start.x,start.y), target, grid_map_obj, WorldMap, 25 , 50)
     
     # Build path from start to goal
     waypoints = rrt.build()
@@ -58,6 +58,9 @@ def navigateTo(target=None):
     if waypoints is None:
         rospy.loginfo("Failed to find a path to target location \n. TERMINATING")
         return
+    
+    rrt.visualize(rrt.start)
+    plt.show()
     
     rospy.loginfo("Successfully found a path !")
     rospy.loginfo("Beginning navigation from ({}, {})...".format(round(start.x,2), round(start.y,2), target[0], target[1]))
