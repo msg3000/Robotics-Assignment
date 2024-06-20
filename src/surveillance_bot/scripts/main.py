@@ -27,6 +27,13 @@ def navigateTo(target=None):
     if target is None:
         return
     
+    # Instantiate navigator for state service info and publishing
+    navigator = Navigator()
+
+    # Extract current state information
+    currentPos, _ =navigator.getCurrentState()
+    start = currentPos # Starting position
+    
     rospy.loginfo("Beginning search for a path from ({},{}) to ({},{})".format(round(start.x,2), round(start.y,2), target[0], target[1]))
     rospy.loginfo("Instantiating world information and map...")
     # Instantiate world map with pixel mapping of supplied map
@@ -40,12 +47,6 @@ def navigateTo(target=None):
     grid_map_obj = GridMapFromImage(padded_binary_image)
     plt.imshow(1 - grid_map_obj.binary_image, cmap = plt.cm.gray)
     
-    # Instantiate navigator for state service info and publishing
-    navigator = Navigator()
-
-    # Extract current state information
-    currentPos, _ =navigator.getCurrentState()
-    start = currentPos # Starting position
 
     rospy.loginfo("Computing path from ({}, {}) to ({}, {})...".format(round(start.x,2), round(start.y,2), target[0], target[1]))
     # Instantiate RRT with current start, goal, grid map and step size parameters

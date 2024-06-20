@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-
+import os
 
 class WorldMapping:
     """
@@ -10,7 +10,8 @@ class WorldMapping:
     def __init__(self, resolution, origin):
         # Configure image and resolution for mapping
         self.origin= origin
-        self.image=Image.open('../maps/map_2_final.jpg')
+    
+        self.image=Image.open(os.getcwd() + '/maps/map_2_final.jpg')
         self.height= self.image.size[1]
         self.width= self.image.size[0]
         self.resolutiony = 28.8/self.height
