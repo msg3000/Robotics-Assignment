@@ -1,3 +1,5 @@
+# Handles state information and velocity publishing
+
 import rospy
 import sys
 import rospy
@@ -21,6 +23,9 @@ class Navigator:
 
 
     def getCurrentState(self):
+        """
+        Extracts current coordinates and orientation from world
+        """
         state = self.get_model_state('mobile_base', "")
         
         position, orientation = state.pose.position, state.pose.orientation
@@ -29,9 +34,12 @@ class Navigator:
         
 
     def publish_velocity(self, linear_vel , angular_vel):
+        """
+        Publish velocity to turtlebot, linear along x and angular around z
+        """
+
         rate = rospy.Rate(10)
         self.velocity_message.linear.x = linear_vel[0]
-        self.velocity_message.linear.y = linear_vel[1]
 
         self.velocity_message.angular.z = angular_vel
         while not rospy.is_shutdown():

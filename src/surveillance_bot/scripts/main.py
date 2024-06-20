@@ -5,8 +5,7 @@ from geometry_msgs.msg import Twist
 from pid import PIDController
 from navigator import Navigator
 import numpy as np
-from Mapping import WorldMapping
-import cv2
+from mapping import WorldMapping
 from rrt import padding, GridMapFromImage, Node, RRT
 import matplotlib.pyplot as plt
 
@@ -16,68 +15,55 @@ def init_node():
     
 
 def parse_coordinates(coords):
-    print(coords)
+    # Parse inputs correctly
     return list(map(float, coords))
 
 def navigateTo(target=None):
+    """ 
+    Main operating logic of surveillance bot.
+    Takes in a specified target in the world and navigates there
+    """
 
+    if target is None:
+        return
     
+    rospy.loginfo("Beginning search for a path from ({},{}) to ({},{})".format(round(start.x,2), round(start.y,2), target[0], target[1]))
+    rospy.loginfo("Instantiating world information and map...")
+    # Instantiate world map with pixel mapping of supplied map
     WorldMap=WorldMapping(0.05,[-17,-14.4,0])
-   # GoalpixelCoords=WorldMap.world_to_pixel(target[0],target[1])
    
-    image = WorldMap.image #Added this
-    
+    # Extract image, binarize and apply padding
+    image = WorldMap.image
     padded_binary_image = padding(image)
-    print(padded_binary_image.shape)
+
     # Initialize the grid map from the padded binary image
     grid_map_obj = GridMapFromImage(padded_binary_image)
+    plt.imshow(1 - grid_map_obj.binary_image, cmap = plt.cm.gray)
     
-    # -- Load in Map
-    # Map start, target to image coords
-    # Build PRM on that map
-    # Generate path from PRM and convert to world points
-
+    # Instantiate navigator for state service info and publishing
     navigator = Navigator()
+
+    # Extract current state information
     currentPos, _ =navigator.getCurrentState()
-    print("CURRENT POS:", currentPos)
-    CurrentpixelCoords=WorldMap.world_to_pixel(currentPos.x,currentPos.y)
-    print("HEIGHT",WorldMap.height)
-    print("WIDTH", WorldMap.width)
-    print("CURRENT PIXEL COORDS: ",CurrentpixelCoords)
-    # print("GOAL PIXEL COORDS: ",GoalpixelCoords)
-    start = None # Starting position
-    goal = None # Ending position
+    start = currentPos # Starting position
 
-    rrt=RRT((currentPos.x,currentPos.y), target, grid_map_obj, WorldMap, 15 , 25)
+    rospy.loginfo("Computing path from ({}, {}) to ({}, {})...".format(round(start.x,2), round(start.y,2), target[0], target[1]))
+    # Instantiate RRT with current start, goal, grid map and step size parameters
+    rrt=RRT((start.x,start.y), target, grid_map_obj, WorldMap, 15 , 25)
     
+    # Build path from start to goal
     waypoints = rrt.build()
-    waypoints_pixel = [WorldMap.world_to_pixel(x[0], x[1]) for x in waypoints]
-    print("WAYPOINTS: ",waypoints)
-    print("PIXEL WAYPOINtS: ",waypoints_pixel)
-    plt.imshow(grid_map_obj.binary_image)
 
-    for node in waypoints_pixel:
-            if node == start:
-                plt.plot(node, 'bo', markersize = 8, label = "Start")
-                plt.text(node[0] - 1,node[1] + 1,'START')
-            elif node == target:
-                plt.plot(node, 'ro', label = "target", markersize = 8)
-                plt.text(node[0] + 1,node[1] + 1,'GOAL')
-            else:
-                plt.plot(*node, marker = 'o', color = 'orange')
-     
+    if waypoints is None:
+        rospy.loginfo("Failed to find a path to target location \n. TERMINATING")
+        return
     
-    for i, waypoint in enumerate(waypoints_pixel):
-        if i != len(waypoints_pixel) - 1:
-            start, end = waypoint, waypoints_pixel[i + 1]
-            plt.plot([start[0], end[0]], [start[1], end[1]], 'g-')
-    plt.show()
-    
+    rospy.loginfo("Successfully found a path !")
+    rospy.loginfo("Beginning navigation from ({}, {})...".format(round(start.x,2), round(start.y,2), target[0], target[1]))
     waypoints = [np.array(waypoint) for waypoint in waypoints]
-    
     waypoint_count = 0
     
-
+    # Initialise pid controllers for linear and angular
     pid_linear = PIDController(1, 0.01,0)
     pid_angular = PIDController(2, 0,0)
 
@@ -92,8 +78,10 @@ def navigateTo(target=None):
         # Compute target orientation based on current waypoint
         direction = waypoints[waypoint_count] - position
        
+        # Target angular in direction of next waypoint
         target_angular = np.arctan2(direction[1], direction[0])
         
+        # Ensures angles are normalised between 0 and 2*pi, and that no larger than pi
         if yaw < 0:
             yaw += 2*np.pi
         
@@ -106,8 +94,7 @@ def navigateTo(target=None):
         if target_angular - yaw > np.pi:
             yaw += 2*np.pi
         
-
-        # Set the goals
+        # Set the goals for pid
         pid_linear.goal = waypoints[waypoint_count]
         pid_angular.goal = target_angular
 
@@ -115,36 +102,34 @@ def navigateTo(target=None):
         update_linear = pid_linear.getUpdate(position)
         update_angular = pid_angular.getUpdate(yaw)
         
-        # Publish velocities
+        # If angular deviation is significant, face the goal direction first
         if abs(update_angular) >= 0.4:
             update_linear = [0,0]
         update_linear = [np.linalg.norm(update_linear), 0]
+
+        # If updating linearly, prevent angular deviations
         if (update_linear[0]!=0):
             update_angular=0    
         navigator.publish_velocity(update_linear, update_angular)
 
         # Reached current waypoint, advance next
         if np.linalg.norm(position - waypoints[waypoint_count]) < 0.05:
-            rospy.loginfo("Reached this wayppoint")
+            rospy.loginfo("Reached waypoint : ({}, {})".format(round(waypoints[waypoint_count][0],2), round(waypoints[waypoint_count][1],2)))
             waypoint_count += 1
             if waypoint_count < len(waypoints):
                 pid_linear.goal = waypoints[waypoint_count]
     
-    rospy.loginfo("Successfully arrived at location: %s ! ", position)
-
-    stop_vel = np.zeros(3)
+    rospy.loginfo("SUCCESSFULLY ARRIVED AT GOAL LOCATION: ({},{}) ! ".format(target[0], target[1]))
 
 
 
 if __name__ == '__main__':
     try:
         init_node() # Create node
-        target = parse_coordinates(input())
-        
+        try:
+            target = parse_coordinates(input("Enter the surveillance destination of the form x,y: "))  
+        except:
+            print("Please specify the target location in the form x,y")
         navigateTo(target)
-
-        # except:
-        #     print("Please specify the target location in the form x,y")
-        
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("An unexpected error has occurred")

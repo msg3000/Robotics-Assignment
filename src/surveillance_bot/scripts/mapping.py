@@ -3,10 +3,14 @@ from PIL import Image
 
 
 class WorldMapping:
+    """
+    Handles logic of pixel to world mapping
+    """
 
     def __init__(self, resolution, origin):
+        # Configure image and resolution for mapping
         self.origin= origin
-        self.image=Image.open('/home/shnifel/ros_home/robot_assignment_ws/map_2_final.jpg')
+        self.image=Image.open('../maps/map_2_final.jpg')
         self.height= self.image.size[1]
         self.width= self.image.size[0]
         self.resolutiony = 28.8/self.height

@@ -1,33 +1,41 @@
+# Handles logic of RRT and path search
 
 import numpy as np
-from Mapping import WorldMapping
+from mapping import WorldMapping
 import random
 import math
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
 
-def binary_dilation_image(image, structuring_element):
 
+def binary_dilation_image(image, structuring_element):
+  """
+  Perform a dilation of a binary image with the given structuring element
+  """
   image_h, image_w = image.shape
   struct_h, struct_w = structuring_element.shape
-  # Calculate the padding needed for the structuring element
+
   pad_h = struct_h // 2
   pad_w = struct_w // 2
   # Pad the original image with zeros around the border
   padded_image = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)), mode='constant', constant_values=0)
-  # Initialize the output dilated image
   dilated_image = np.zeros_like(image)
+
   # Perform the dilation operation
   for i in range(image_h):
-      for j in range(image_w):# Extract the region of interest from the padded image
-          region = padded_image[i:i + struct_h, j:j + struct_w]# Apply the structuring element
+      for j in range(image_w):
+          region = padded_image[i:i + struct_h, j:j + struct_w]
           if np.any(np.logical_and(region,structuring_element)):
               dilated_image[i, j] = 1
   return dilated_image
 
 
 def bresenham_line(x0, y0, x1, y1):
+    """
+    Implements Bressenham line algorithm for constructing points along a line.
+    Pseudocode from: https://www.baeldung.com/cs/bresenhams-line-algorithm
+    """
     
     points = []
     dx = abs(x1 - x0)
@@ -51,19 +59,21 @@ def bresenham_line(x0, y0, x1, y1):
     return points
 
 def padding(image):
-    # Convert the image to binary (0: obstacles, 255: free space)
+    # Convert the image to binary (1: obstacles, 0: free space)
     image = ImageOps.grayscale(image)
     binary_image = image.point(lambda p: p > 128 and 1)
     
     # Add padding to obstacles
-    padding_size = 16    # Adjust this value as needed
+    padding_size = 16 
     padded_binary_image = binary_dilation_image(1-np.array(binary_image), np.ones((padding_size,padding_size)))
-    # Convert padded image to numpy array
     padded_binary_image = np.array(padded_binary_image)
 
     return padded_binary_image
 
 class GridMapFromImage:
+    """
+    Handles logic of free space from image
+    """
     def __init__(self, binary_image):
         self.binary_image = binary_image
         self.height, self.width = binary_image.shape
@@ -83,6 +93,9 @@ class Node:
         self.cost = 0
 
 class RRT:
+    """
+    Implements RRT* algorithm
+    """
     def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2):
         self.start = Node(*world_map.world_to_pixel(*start))
         self.goal = Node(*world_map.world_to_pixel(*goal))
@@ -90,10 +103,13 @@ class RRT:
         self.world_map = world_map
         self.step_size = step_size
         self.neighbourhood_size = neighbourhood_size
-        self.goal_sample_probs = 0
+        self.goal_sample_probs = 0.1 # Sample goal with some probability
         self.tree = [self.start]
 
     def get_random_point(self):
+        """
+        Generate a random point in the space
+        """
         x,y = None, None
         if random.uniform(0,1) < self.goal_sample_probs:
             x = self.goal.x
@@ -104,6 +120,9 @@ class RRT:
         return x, y
 
     def get_nearest_node(self, point):
+        """
+        Compute nearest node in tree to a given point
+        """
         nearest_node = None
         min_dist = float('inf')
         for node in self.tree:
@@ -114,6 +133,9 @@ class RRT:
         return nearest_node
     
     def get_neighbourhood(self, point):
+        """
+        Extract all tree nodes within certain radius point
+        """
         neighbourhood = []
         for node in self.tree:
             if self.euclidean_distance((node.x, node.y), point) <= self.neighbourhood_size and self.is_collision_free(node.x, node.y, point[0], point[1]):
@@ -124,8 +146,10 @@ class RRT:
         return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
     def is_collision_free(self, x, y, x1, y1):
+        """
+        Collision detection - generate all points along path using Bressenham algorithm, ensure none pass through an obstacle
+        """
         points=bresenham_line(x,y,x1,y1)
-       
         return np.all([self.grid_map.is_free_space(dx, dy) for dx,dy in points])
     
     def get_shortest_path_node(self, neighbourhood, point):
@@ -133,7 +157,16 @@ class RRT:
 
         
     def step(self):
-        
+        """
+        Main RRT generation logic.
+        - Sample new point
+        - Test if valid
+        - If valid, find nearest node and optimise:
+            1. Set as parent node, node in tree which minimises its overall cost from start.
+            2. Rewire tree to minimise overall cost from start of its neighbouring points
+        """
+
+        # Sample random point
         random_point = self.get_random_point()
         nearest_node = self.get_nearest_node(random_point)
         theta = math.atan2(random_point[1] - nearest_node.y, random_point[0] - nearest_node.x)
@@ -143,17 +176,21 @@ class RRT:
         if self.is_collision_free(nearest_node.x, nearest_node.y, new_x, new_y):
             new_node = Node(new_x, new_y)
             
+            # Extract neighbourhood and optimise parent and cost
             neighbourhood = self.get_neighbourhood((new_x, new_y))
             parent_node = self.get_shortest_path_node(neighbourhood, (new_x, new_y))
             self.tree.append(new_node)
             new_node.parent = parent_node
             new_node.cost = parent_node.cost + self.euclidean_distance((parent_node.x, parent_node.y), (new_x, new_y))
 
+            # Rewire tree for optimality
             for node_neighbour in neighbourhood:
                 tentative_cost = new_node.cost + self.euclidean_distance((node_neighbour.x, node_neighbour.y), (new_x,new_y))
                 if node_neighbour.cost > tentative_cost :
                     node_neighbour.parent = new_node
                     node_neighbour.cost = tentative_cost
+
+            # Goal test
             if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
                 self.goal.parent = new_node
                 self.tree.append(self.goal)
@@ -161,12 +198,18 @@ class RRT:
         return False
 
     def build(self, max_steps=1000):
+        """
+        Build RRT 
+        """
         for _ in range(max_steps):
             if self.step():
                 return self.get_path()
         return None
 
     def get_path(self):
+        """
+        Reconfigure path from goal node
+        """
         path = []
         node = self.goal
         while node is not None:

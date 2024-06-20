@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# Implements PID for general objects.
 import sys
 import rospy
 import time
