@@ -1,4 +1,4 @@
-prefix=/home/shnifel/ros_home/robot_assignment_ws/install
+prefix=/home/msg/ros_home/robot_assignment_ws/install
 
 Name: surveillance_bot
 Description: Description of surveillance_bot

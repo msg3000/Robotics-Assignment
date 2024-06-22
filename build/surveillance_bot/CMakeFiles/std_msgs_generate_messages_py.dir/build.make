@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/shnifel/ros_home/robot_assignment_ws/src
+CMAKE_SOURCE_DIR = /home/msg/ros_home/robot_assignment_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/shnifel/ros_home/robot_assignment_ws/build
+CMAKE_BINARY_DIR = /home/msg/ros_home/robot_assignment_ws/build
 
 # Utility rule file for std_msgs_generate_messages_py.
 
@@ -63,10 +63,10 @@ surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/build: std_msgs_ge
 .PHONY : surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/build
 
 surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/clean:
-	cd /home/shnifel/ros_home/robot_assignment_ws/build/surveillance_bot && $(CMAKE_COMMAND) -P CMakeFiles/std_msgs_generate_messages_py.dir/cmake_clean.cmake
+	cd /home/msg/ros_home/robot_assignment_ws/build/surveillance_bot && $(CMAKE_COMMAND) -P CMakeFiles/std_msgs_generate_messages_py.dir/cmake_clean.cmake
 .PHONY : surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/clean
 
 surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/depend:
-	cd /home/shnifel/ros_home/robot_assignment_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/shnifel/ros_home/robot_assignment_ws/src /home/shnifel/ros_home/robot_assignment_ws/src/surveillance_bot /home/shnifel/ros_home/robot_assignment_ws/build /home/shnifel/ros_home/robot_assignment_ws/build/surveillance_bot /home/shnifel/ros_home/robot_assignment_ws/build/surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/msg/ros_home/robot_assignment_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/msg/ros_home/robot_assignment_ws/src /home/msg/ros_home/robot_assignment_ws/src/surveillance_bot /home/msg/ros_home/robot_assignment_ws/build /home/msg/ros_home/robot_assignment_ws/build/surveillance_bot /home/msg/ros_home/robot_assignment_ws/build/surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : surveillance_bot/CMakeFiles/std_msgs_generate_messages_py.dir/depend
 

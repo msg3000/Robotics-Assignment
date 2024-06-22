@@ -1,24 +1,24 @@
 Determining if the pthread_create exist failed with the following output:
-Change Dir: /home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp
+Change Dir: /home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_12f13/fast"
-/usr/bin/make -f CMakeFiles/cmTC_12f13.dir/build.make CMakeFiles/cmTC_12f13.dir/build
-make[1]: Entering directory '/home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_12f13.dir/CheckSymbolExists.c.o
-/usr/bin/cc     -o CMakeFiles/cmTC_12f13.dir/CheckSymbolExists.c.o   -c /home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
-Linking C executable cmTC_12f13
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12f13.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_12f13.dir/CheckSymbolExists.c.o  -o cmTC_12f13 -rdynamic 
-CMakeFiles/cmTC_12f13.dir/CheckSymbolExists.c.o: In function `main':
+Run Build Command:"/usr/bin/make" "cmTC_1cea2/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1cea2.dir/build.make CMakeFiles/cmTC_1cea2.dir/build
+make[1]: Entering directory '/home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1cea2.dir/CheckSymbolExists.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_1cea2.dir/CheckSymbolExists.c.o   -c /home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_1cea2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1cea2.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_1cea2.dir/CheckSymbolExists.c.o  -o cmTC_1cea2 -rdynamic 
+CMakeFiles/cmTC_1cea2.dir/CheckSymbolExists.c.o: In function `main':
 CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_12f13.dir/build.make:97: recipe for target 'cmTC_12f13' failed
-make[1]: *** [cmTC_12f13] Error 1
-make[1]: Leaving directory '/home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_12f13/fast' failed
-make: *** [cmTC_12f13/fast] Error 2
+CMakeFiles/cmTC_1cea2.dir/build.make:97: recipe for target 'cmTC_1cea2' failed
+make[1]: *** [cmTC_1cea2] Error 1
+make[1]: Leaving directory '/home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1cea2/fast' failed
+make: *** [cmTC_1cea2/fast] Error 2
 
-File /home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+File /home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
 /* */
 #include <pthread.h>
 
@@ -34,22 +34,22 @@ int main(int argc, char** argv)
 }
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp
+Change Dir: /home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_b4897/fast"
-/usr/bin/make -f CMakeFiles/cmTC_b4897.dir/build.make CMakeFiles/cmTC_b4897.dir/build
-make[1]: Entering directory '/home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_b4897.dir/CheckFunctionExists.c.o
-/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_b4897.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
-Linking C executable cmTC_b4897
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b4897.dir/link.txt --verbose=1
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_b4897.dir/CheckFunctionExists.c.o  -o cmTC_b4897 -rdynamic -lpthreads 
+Run Build Command:"/usr/bin/make" "cmTC_7bcfc/fast"
+/usr/bin/make -f CMakeFiles/cmTC_7bcfc.dir/build.make CMakeFiles/cmTC_7bcfc.dir/build
+make[1]: Entering directory '/home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7bcfc.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_7bcfc.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7bcfc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7bcfc.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_7bcfc.dir/CheckFunctionExists.c.o  -o cmTC_7bcfc -rdynamic -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_b4897.dir/build.make:97: recipe for target 'cmTC_b4897' failed
-make[1]: *** [cmTC_b4897] Error 1
-make[1]: Leaving directory '/home/shnifel/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_b4897/fast' failed
-make: *** [cmTC_b4897/fast] Error 2
+CMakeFiles/cmTC_7bcfc.dir/build.make:97: recipe for target 'cmTC_7bcfc' failed
+make[1]: *** [cmTC_7bcfc] Error 1
+make[1]: Leaving directory '/home/msg/ros_home/robot_assignment_ws/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_7bcfc/fast' failed
+make: *** [cmTC_7bcfc/fast] Error 2
 
 

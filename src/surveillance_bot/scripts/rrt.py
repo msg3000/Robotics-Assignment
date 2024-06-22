@@ -6,7 +6,7 @@ import random
 import math
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
-
+import warnings
 
 
 def binary_dilation_image(image, structuring_element):
@@ -97,7 +97,7 @@ class RRT:
     """
     Implements RRT* algorithm
     """
-    def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2, verbose = True):
+    def __init__(self, start, goal, grid_map, world_map, step_size=1, neighbourhood_size = 2, verbose = True, animate = True):
         self.start = Node(*world_map.world_to_pixel(*start))
         self.goal = Node(*world_map.world_to_pixel(*goal))
         self.grid_map = grid_map
@@ -107,6 +107,15 @@ class RRT:
         self.goal_sample_probs = 0.1 # Sample goal with some probability
         self.tree = [self.start]
         self.verbose = verbose
+        self.animate = animate
+
+        if self.verbose:
+            warnings.filterwarnings("ignore",".*GUI is implemented.*")
+            plt.plot(self.start.x, self.start.y, 'bo', markersize = 9, label = "Start")
+            plt.text(self.start.x, self.start.y,'S', fontsize = 11)
+            plt.plot(self.goal.x, self.goal.y, 'ro', markersize = 9, label = "Start")
+            plt.text(self.goal.x , self.goal.y ,'G', fontsize =11)
+            plt.pause(0.1)
 
     def get_random_point(self):
         """
@@ -195,6 +204,11 @@ class RRT:
                     node_neighbour.parent = new_node
                     new_node.children.append(node_neighbour)
                     node_neighbour.cost = tentative_cost
+            
+            if self.verbose and self.animate:
+                self.visualize(self.start)
+                plt.plot(new_x, new_y, 'o', markersize = 6, color = "orange")
+                plt.pause(0.0001)
 
             # Goal test
             if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
@@ -202,6 +216,7 @@ class RRT:
                 new_node.children.append(self.goal)
                 self.tree.append(self.goal)
                 return True
+            
         return False
     
     def visualize(self, root):
@@ -212,7 +227,7 @@ class RRT:
         
 
 
-    def build(self, max_steps=1000):
+    def build(self, max_steps=10000):
         """
         Build RRT 
         """
@@ -221,21 +236,18 @@ class RRT:
                 return self.get_path()
         return None
 
-    def get_path(self):
+    def get_path(self, display = False):
         """
         Reconfigure path from goal node
         """
-        if self.verbose:
-            plt.plot(self.start.x, self.start.y, 'bo', markersize = 8, label = "Start")
-            plt.text(self.start.x - 2, self.start.y - 2,'START')
-            plt.plot(self.goal.x, self.goal.y, 'bo', markersize = 8, label = "Start")
-            plt.text(self.goal.x + 2, self.goal.y + 2,'GOAL')
         path = []
         node = self.goal
         while node.parent is not None:
             world_x, world_y = self.world_map.pixel_to_world(node.x, node.y)
-            if self.verbose:
+            if self.verbose and display:
+                plt.plot(node.parent.x, node.parent.y, 'go', markersize = 5)
                 plt.plot([node.parent.x, node.x], [node.parent.y, node.y], color='red', linewidth =3)
+                plt.pause(0.1)
             path.append((world_x, world_y))
             node = node.parent
         return path[::-1]  # Reverse the path

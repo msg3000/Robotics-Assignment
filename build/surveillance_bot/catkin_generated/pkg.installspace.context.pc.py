@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "surveillance_bot"
-PROJECT_SPACE_DIR = "/home/shnifel/ros_home/robot_assignment_ws/install"
+PROJECT_SPACE_DIR = "/home/msg/ros_home/robot_assignment_ws/install"
 PROJECT_VERSION = "0.0.0"
