@@ -30,7 +30,7 @@ The world environment can now be launched through running:
 
 Code for the surveillance bot is contained in the `scripts` folder of the `surveillance_bot` package. The code files are structured as follows:
 
-.
+    .
     ├── main.py                   # Main script for the surveillance bot
     ├── rrt.py                    # Implements RRT-star algorithm
     ├── navigator.py              # Handles state information and velocity publishing
@@ -44,4 +44,22 @@ rosrun surveillance_bot main.py
 ```
 
 Following this, you will be prompted to enter in the desired coordinate locations of the world.
+
+### Creating a map
+
+The following commands should be run, each in a new tab with the command:
+```bash
+source devel/setup.bash
+```
+before each.
+
+```bash
+./startWorld
+
+rosrun gmapping slam_gmapping
+
+roslaunch turtlebot_rviz_launchers view_navigation.launch
+
+roslaunch kobuki_keyop keyop.launch
+```
 
