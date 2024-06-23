@@ -33,15 +33,16 @@ class Navigator:
         return (position, yaw)
         
 
-    def publish_velocity(self, linear_vel , angular_vel):
+    def publish_velocity(self, linear_vel , angular_vel, angular = False):
         """
         Publish velocity to turtlebot, linear along x and angular around z
         """
 
         rate = rospy.Rate(10)
-        self.velocity_message.linear.x = linear_vel[0]
-
+    
+        self.velocity_message.linear.x = linear_vel
         self.velocity_message.angular.z = angular_vel
+        
         while not rospy.is_shutdown():
             #Ensure that node has been subscribed to by takeoff
             is_connected = self.velocity_publisher.get_num_connections() > 0

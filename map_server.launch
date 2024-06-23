@@ -1,3 +1,0 @@
-<launch>
-  <node name="map_server" pkg="map_server" type="map_server" args="/home/shnifel/ros_home/robot_assignment_ws/map.yaml" />
-</launch>

@@ -115,7 +115,7 @@ class RRT:
             plt.text(self.start.x, self.start.y,'S', fontsize = 11)
             plt.plot(self.goal.x, self.goal.y, 'ro', markersize = 9, label = "Start")
             plt.text(self.goal.x , self.goal.y ,'G', fontsize =11)
-            plt.pause(0.1)
+            plt.pause(2)
 
     def get_random_point(self):
         """
@@ -211,7 +211,7 @@ class RRT:
                 plt.pause(0.0001)
 
             # Goal test
-            if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= self.step_size:
+            if self.euclidean_distance((new_x, new_y), (self.goal.x, self.goal.y)) <= 2*self.step_size and self.is_collision_free(new_x, new_y, self.goal.x, self.goal.y):
                 self.goal.parent = new_node
                 new_node.children.append(self.goal)
                 self.tree.append(self.goal)

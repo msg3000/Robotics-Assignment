@@ -23,15 +23,18 @@ class PIDController:
     def set_goal(self, goal):
         self.goal = goal
 
-    def getUpdate(self, current_val):
+    def getUpdate(self, current_val, normed = False):
 
         error = self.goal - current_val
+        if normed:
+            error = np.linalg.norm(error)
         dt = time.time() - self.prev_time
         self.err_i += error * dt
-        derror = (error - self.prev_err)/dt if dt > 0 else 0
+        derror = error - self.prev_err
     
         update = self.kp * error + self.ki * self.err_i + self.kd * derror
 
+        self.err_i = np.clip(self.err_i, -1, 1)
         self.prev_err = error
         self.prev_time = time.time()
 
